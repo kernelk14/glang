@@ -3,6 +3,7 @@ import (
     "fmt"
     "strings"
     "strconv"
+    "os"
 )
 
 type GlangOps struct {
@@ -33,7 +34,7 @@ func (s *Stack) pop() (int, bool) {
 // The easiest way to print
 var print = fmt.Printf
 
-func lexer(program string) {
+func evaluate(program string) {
     var program_split = strings.Split(program, " ")
     var stack Stack
     for i := 0; i < len(program_split); i++ {
@@ -55,6 +56,13 @@ func lexer(program string) {
                     print("Glang Debug [Result]: %d\n", a)
                 }
                 break
+            case "write\n":
+                print("write  : A Write instruction\n")
+                a, aa := stack.pop()
+                if aa == true {
+                    print("Glang Debug [Result]: %d\n", a)
+                }
+                break
             default:
                 print("%s  : Integers to be pushed\n", code)
                 c_psh, err := strconv.Atoi(code)
@@ -67,7 +75,16 @@ func lexer(program string) {
     }
 }
 
+func check_err(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
+
 func main() {
-    var program = "34 35 + write"
-    lexer(program) 
+    // var program = "34 35 + write"
+    
+    program, err := os.ReadFile("./hello.glg")
+    check_err(err)
+    evaluate(string(program)) 
 }
