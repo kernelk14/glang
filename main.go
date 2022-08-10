@@ -23,18 +23,17 @@ const STAGE = "devel"
 var red = color.New(color.FgRed).SprintFunc()
 
 var (
-	yellow = color.New(color.FgYellow).SprintFunc()
-	redC   = red("ERROR:")
+	yellow  = color.New(color.FgYellow).SprintFunc()
+	yellowC = yellow("WARNING:")
+	redC    = red("ERROR:")
 )
 
 func err(err_str string) {
 	print("%s %s", redC, err_str)
 }
 
-type GlangOps struct {
-	Data  int
-	Ident string
-	Oper  string
+func warn(warning string) {
+	print("%s %s", yellowC, warning)
 }
 
 // Here are the list of operations, after you add an operation here, go to function simulate()
@@ -73,6 +72,9 @@ func (s *Stack) pop() (int, bool) {
 	}
 }
 
+// I've added some tracing for stack
+var trace = false
+
 // }}}
 
 // The easiest way to print
@@ -85,6 +87,8 @@ func evaluate(program string) {
 	for i := 0; i < len(program_split); {
 		code := program_split[i]
 		// TODO(#3): Comment out this Debug Messages if ever.
+
+		// TODO: Add support for string literals
 		if strings.HasPrefix(code, "\"") == true {
 			err("Strings are not implemented yet.\n")
 			break
@@ -140,11 +144,18 @@ func evaluate(program string) {
 			i = g
 		case "end":
 			// break
-			os.Exit(3)
+			os.Exit(1)
+		case "trace":
+			warn("Stack tracing started\n")
+			print("Stack Contents: %d\n", stack)
 		default:
 			print("%s  : Integers to be pushed\n", code)
 			c_psh, _ := strconv.Atoi(code)
 			stack.push(c_psh)
+			if trace == true {
+				warn("Stack tracing started\n")
+				print("Stack Contents: %d\n", stack)
+			}
 			// print("Glang Debug [Stack Atoi() __err__ trace]: ", err)
 			// print("\n")
 		}
