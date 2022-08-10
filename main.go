@@ -84,7 +84,7 @@ func evaluate(program string) {
 	var goto_stack Stack
 	for i := 0; i < len(program_split); {
 		code := program_split[i]
-		// TODO: Comment out this Debug Messages if ever.
+		// TODO(#3): Comment out this Debug Messages if ever.
 		if strings.HasPrefix(code, "\"") == true {
 			err("Strings are not implemented yet.\n")
 			break
