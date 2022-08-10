@@ -1,4 +1,4 @@
-// TODO: Add Loops for Glang.
+// TODO(#2): Add Loops for Glang.
 
 package main
 
