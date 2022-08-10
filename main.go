@@ -1,3 +1,5 @@
+// TODO: Add Loops for Glang.
+
 package main
 
 import (
@@ -44,7 +46,8 @@ var print = fmt.Printf
 func evaluate(program string) {
 	program_split := strings.Split(program, " ")
 	var stack Stack
-	for i := 0; i < len(program_split); i++ {
+	var goto_stack Stack
+	for i := 0; i < len(program_split); {
 		code := program_split[i]
 		// TODO: Comment out this Debug Messages if ever.
 		switch code {
@@ -86,6 +89,14 @@ func evaluate(program string) {
 			    print("Glang Debug [Result]: %d\n", a)
 			} */
 			print("Glang Debug [Result]: %d\n", a)
+		case "pos":
+			goto_stack.push(int(program[i+1]))
+		case "goto":
+			g, _ := goto_stack.pop()
+			i = g
+		case "end":
+			break
+			os.Exit(0)
 		default:
 			print("%s  : Integers to be pushed\n", code)
 			c_psh, _ := strconv.Atoi(code)
@@ -93,6 +104,7 @@ func evaluate(program string) {
 			// print("Glang Debug [Stack Atoi() __err__ trace]: ", err)
 			// print("\n")
 		}
+		i += 1
 		print("----------------------------------------------\n")
 		// print("%s\n", code)
 	}
@@ -102,7 +114,6 @@ func check_err(e error) {
 	if e != nil {
 		panic(e)
 		// print("Ur Mom\n")
-		os.Exit(1)
 	}
 }
 
