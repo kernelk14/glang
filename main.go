@@ -88,7 +88,7 @@ func evaluate(program string) {
 		code := program_split[i]
 		// TODO(#3): Comment out this Debug Messages if ever.
 
-		// TODO: Add support for string literals
+		// TODO(#4): Add support for string literals
 		if strings.HasPrefix(code, "\"") == true {
 			err("Strings are not implemented yet.\n")
 			break
