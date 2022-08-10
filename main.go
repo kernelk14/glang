@@ -95,8 +95,8 @@ func evaluate(program string) {
 			g, _ := goto_stack.pop()
 			i = g
 		case "end":
-			break
-			os.Exit(0)
+			// break
+			os.Exit(3)
 		default:
 			print("%s  : Integers to be pushed\n", code)
 			c_psh, _ := strconv.Atoi(code)

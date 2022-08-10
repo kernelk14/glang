@@ -1,2 +1,2 @@
-5 10 + write
+5 10 + write end
 pos 4 goto
