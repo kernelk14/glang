@@ -5,10 +5,23 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
+
+const VERSION = "0.0.3-beta"
+
+// Special Functions
+var red = color.New(color.FgRed).SprintFunc()
+var redC = red("ERROR:")
+
+func err(err_str string) {
+	print("%s %s", redC, err_str)
+}
 
 type GlangOps struct {
 	Data  int
@@ -128,17 +141,28 @@ func usage() {
 	print("Usage: glang <filename>\n")
 }
 
+func simulate(file string) {
+	program_file, err := os.ReadFile(os.Args[1])
+	check_err(err)
+	// var program = string(program_file)
+	program := strings.TrimSuffix(string(program_file), "\n")
+	evaluate(TrimNewLines(string(program)))
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		usage()
-		print("ERROR: Did not supply enough arguments. Maybe you forgot the filename?\n")
+
+		// print("%s: Did not supply enough arguments. Maybe you forgot the filename?\n", red("ERROR"))
+		err("Did not supply enough arguments. Maybe you forgot the filename?\n")
 		os.Exit(1)
 		// panic("Did not supply enough arguments.")
 	} else {
-		program_file, err := os.ReadFile(os.Args[1])
-		check_err(err)
-		// var program = string(program_file)
-		program := strings.TrimSuffix(string(program_file), "\n")
-		evaluate(TrimNewLines(string(program)))
+		fileExt := filepath.Ext(os.Args[1])
+		if fileExt != ".glg" {
+			err("Supplying non-Glang file. Make sure it's the right file.\n")
+		} else {
+			simulate(string(os.Args[1]))
+		}
 	}
 }
