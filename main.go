@@ -17,7 +17,7 @@ import (
 const VERSION = "0.0.3-beta"
 
 // Stage: it's either `devel`, or `release`
-const STAGE = "devel"
+const STAGE = "release"
 
 // Special Functions
 var red = color.New(color.FgRed).SprintFunc()
@@ -95,48 +95,57 @@ func evaluate(program string) {
 		}
 		switch code {
 		case "+":
-			print("%s  : A Plus instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Plus instruction\n", code)
+			}
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a + b)
-			// print("Glang Debug [1st integer is in the stack]: ", aa)
-			// print("\nGlang Debug [2nd integer is in the stack]: ", ab)
-			// print("\n")
+
 		case "-":
-			print("%s  : A Minus instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Minus instruction\n", code)
+			}
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(b - a)
-			// print("Glang Debug [1st integer is in the stack]: ", aa)
-			// print("\nGlang Debug [2nd integer is in the stack]: ", ab)
-			// print("\n")
+
 		case "*":
-			print("%s  : A Multiply Instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Multiply Instruction\n", code)
+			}
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a * b)
-			// print("Glang Debug [1st integer is in the stack]: ", aa)
-			// print("\nGlang Debug [2nd integer is in the stack]: ", ab)
-			// print("\n")
+
 		case "/":
-			print("%s  : A Divide Instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Divide Instruction\n", code)
+			}
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a / b)
 		case "write":
-			print("%s  : A Write instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Write instruction\n", code)
+			}
 			a, _ := stack.pop()
-			/* if aa {
-			    print("Glang Debug [Result]: %d\n", a)
-			} */
-			print("Glang Debug [Result]: %d\n", a)
+			if STAGE == "devel" {
+				print("Glang Debug [Result]: %d\n", a)
+			} else {
+				print("%d\n", a)
+			}
 		case "write\n": // I hardcoded this instruction with newline, because i dont have much knowledge in slicing newlines in Go.
-			print("%s  : A Write instruction\n", code)
+			if STAGE == "devel" {
+				print("%s  : A Write instruction\n", code)
+			}
 			a, _ := stack.pop()
-			/* if aa {
-			    print("Glang Debug [Result]: %d\n", a)
-			} */
-			print("Glang Debug [Result]: %d\n", a)
+
+			if STAGE == "devel" {
+				print("Glang Debug [Result]: %d\n", a)
+			} else {
+				print("%d\n", a)
+			}
 		case "pos":
 			goto_stack.push(int(program[i+1]))
 		case "goto":
@@ -149,19 +158,23 @@ func evaluate(program string) {
 			warn("Stack tracing started\n")
 			print("Stack Contents: %d\n", stack)
 		default:
-			print("%s  : Integers to be pushed\n", code)
+			if STAGE == "devel" {
+				print("%s  : Integers to be pushed\n", code)
+			}
 			c_psh, _ := strconv.Atoi(code)
 			stack.push(c_psh)
 			if trace == true {
 				warn("Stack tracing started\n")
 				print("Stack Contents: %d\n", stack)
 			}
-			// print("Glang Debug [Stack Atoi() __err__ trace]: ", err)
-			// print("\n")
+
 		}
 		i += 1
-		print("----------------------------------------------\n")
-		// print("%s\n", code)
+		if STAGE == "devel" {
+			print("----------------------------------------------\n")
+		}
+		// print(program_split[i])
+
 	}
 }
 
@@ -172,7 +185,6 @@ func check_err(e error) {
 	}
 }
 
-// strings.ReplaceAll(string(program_file), "\n", " ")
 func TrimNewLines(s string) string {
 	re := regexp.MustCompile(` +\r?\n +`)
 	return re.ReplaceAllString(s, " ")
