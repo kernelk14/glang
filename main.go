@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -82,7 +81,7 @@ var trace = false
 var print = fmt.Printf
 
 func evaluate(program string) {
-	program_split := strings.Split(program, " ")
+	program_split := strings.Split(strings.ReplaceAll(string(program), "\n", " "), " ")
 	var stack Stack
 	var goto_stack Stack
 	for i := 0; i < len(program_split); {
@@ -200,79 +199,89 @@ func sliceFileName(fileName string) string {
 	return fileName[:len(fileName)-len(filepath.Ext(fileName))]
 }
 
+<<<<<<< HEAD
 // TODO(#5): Refine the compilation
 // TODO(#6): Fix the program iteration
 
 func compile_program(file string) {
 	program_file, err := os.Open(os.Args[1])
+=======
+func compilation(file string) {
+	program_file, err := os.ReadFile(os.Args[1])
+	check_err(err)
+	// program := string(program_file)
+	program := strings.TrimSuffix(string(program_file), "\n")
+	program_split := strings.Split(strings.ReplaceAll(string(program), "\n", " "), " ")
+	print("%s\n", program_split)
+	file_with_ext := os.Args[1]
+	ff := sliceFileName(file_with_ext)
+	out, err := os.Create(ff + ".go")
+>>>>>>> origin/6-program-iteration
 	if err != nil {
 		panic(err)
 	}
-	defer program_file.Close()
+	var stack Stack
+	out.WriteString("package main\n")
+	out.WriteString("import \"fmt\"\n")
+	out.WriteString("func main() {\n")
+	for i, op := range program_split {
+		if STAGE == "devel" {
+			print("%s\n", program_split[i])
+		}
+		code := program_split[i]
+		switch op {
+		case "+":
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			stack.push(a + b)
+			i += 1
+			// out.WriteString("    var a = %d + %d\n", a, b)
+		case "-":
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			stack.push(b - a)
+			i += 1
+		case "write":
+			print("`write`, reaching here.\n")
+			a, _ := stack.pop()
+			_, err := out.WriteString("    fmt.Printf(\"" + "%")
+			_, err2 := out.WriteString("d\\n\", ")
+			w_str := strconv.Itoa(a)
+			_, err3 := out.WriteString(w_str)
+			out.WriteString(")\n")
+			i += 1
+			if err != nil || err2 != nil || err3 != nil {
+				panic(err)
+				panic(err2)
+				panic(err3)
+			}
+		case "write\\n":
+			print("`write\\n`, reaching here.\n")
+			a, _ := stack.pop()
+			_, err := out.WriteString("    fmt.Printf(\"" + "%")
+			_, err2 := out.WriteString("d\\n\", ")
+			w_str := strconv.Itoa(a)
+			_, err3 := out.WriteString(w_str)
+			out.WriteString(")\n")
+			i += 1
+			if err != nil || err2 != nil || err3 != nil {
+				panic(err)
+				panic(err2)
+				panic(err3)
+			}
+		default:
+			i_push, _ := strconv.Atoi(code)
+			stack.push(i_push)
+			i += 1
+		}
 
-	scanner := bufio.NewScanner(program_file)
-	for scanner.Scan() {
-		// Do something for the compiler
-		program := scanner.Text()
-		program_split := strings.Split(program, " ")
-		file_with_ext := os.Args[1]
-		ff := sliceFileName(file_with_ext)
-		out, err := os.Create(ff + ".go")
-		if err != nil {
-			panic(err)
-		}
-		defer out.Close()
-		var stack Stack
-		out.WriteString("package main\n")
-		out.WriteString("import \"fmt\"\n")
-		out.WriteString("func main() {\n")
-		for i := 0; i < len(program_split); i++ {
-			if STAGE == "devel" {
-				print("%s\n", program_split[i])
-			}
-			code := program_split[i]
-			switch code {
-			case "+":
-				a, _ := stack.pop()
-				b, _ := stack.pop()
-				stack.push(a + b)
-				// i += 1
-				// out.WriteString("    var a = %d + %d\n", a, b)
-			case "-":
-				a, _ := stack.pop()
-				b, _ := stack.pop()
-				stack.push(b - a)
-				// i += 1
-			case "write":
-				a, _ := stack.pop()
-				out.WriteString("    fmt.Printf(\"" + "%")
-				out.WriteString("d\\n\", ")
-				w_str := strconv.Itoa(a)
-				out.WriteString(w_str)
-				out.WriteString(")\n")
-				// i += 1
-			case "write\n":
-				a, _ := stack.pop()
-				out.WriteString("    fmt.Printf(\"" + "%")
-				out.WriteString("d\\n\", ")
-				w_str := strconv.Itoa(a)
-				out.WriteString(w_str)
-				out.WriteString(")\n")
-				// i += 1
-			default:
-				i_push, _ := strconv.Atoi(code)
-				stack.push(i_push)
-				// i += 1
-			}
-			// print("Chars: %s\n", program_split[i])
-		}
-		out.WriteString("}\n")
-		// print("Lines: %s\n", program_split)
+		// print("Chars: %s\n", program_split[i])
 	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
+	out.WriteString("}\n")
+	defer out.Close()
 }
+
+// TODO: Refine the compilation
 
 func simulate(file string) {
 	program_file, err := os.ReadFile(os.Args[1])
@@ -305,7 +314,7 @@ func main() {
 		if fileExt != ".glg" {
 			err("Supplying non-Glang file. Make sure it's the right file.\n")
 		} else {
-			compile_program(string(os.Args[1]))
+			compilation(string(os.Args[1]))
 			// simulate(string(os.Args[1]))
 		}
 	}
