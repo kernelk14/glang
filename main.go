@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +18,7 @@ import (
 const VERSION = "0.0.3-beta"
 
 // Stage: it's either `devel`, or `release`
-const STAGE = "release"
+const STAGE = "devel"
 
 // Special Functions
 var red = color.New(color.FgRed).SprintFunc()
@@ -195,6 +196,82 @@ func usage() {
 	print("Usage: glang <filename>\n")
 }
 
+func sliceFileName(fileName string) string {
+	return fileName[:len(fileName)-len(filepath.Ext(fileName))]
+}
+
+// TODO: Refine the compilation
+func compile_program(file string) {
+	program_file, err := os.Open(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
+	defer program_file.Close()
+
+	scanner := bufio.NewScanner(program_file)
+	for scanner.Scan() {
+		// Do something for the compiler
+		program := scanner.Text()
+		program_split := strings.Split(program, " ")
+		file_with_ext := os.Args[1]
+		ff := sliceFileName(file_with_ext)
+		out, err := os.Create(ff + ".go")
+		if err != nil {
+			panic(err)
+		}
+		defer out.Close()
+		var stack Stack
+		out.WriteString("package main\n")
+		out.WriteString("import \"fmt\"\n")
+		out.WriteString("func main() {\n")
+		for i := 0; i < len(program_split); i++ {
+			if STAGE == "devel" {
+				print("%s\n", program_split[i])
+			}
+			code := program_split[i]
+			switch code {
+			case "+":
+				a, _ := stack.pop()
+				b, _ := stack.pop()
+				stack.push(a + b)
+				// i += 1
+				// out.WriteString("    var a = %d + %d\n", a, b)
+			case "-":
+				a, _ := stack.pop()
+				b, _ := stack.pop()
+				stack.push(b - a)
+				// i += 1
+			case "write":
+				a, _ := stack.pop()
+				out.WriteString("    fmt.Printf(\"" + "%")
+				out.WriteString("d\\n\", ")
+				w_str := strconv.Itoa(a)
+				out.WriteString(w_str)
+				out.WriteString(")\n")
+				// i += 1
+			case "write\n":
+				a, _ := stack.pop()
+				out.WriteString("    fmt.Printf(\"" + "%")
+				out.WriteString("d\\n\", ")
+				w_str := strconv.Itoa(a)
+				out.WriteString(w_str)
+				out.WriteString(")\n")
+				// i += 1
+			default:
+				i_push, _ := strconv.Atoi(code)
+				stack.push(i_push)
+				// i += 1
+			}
+			// print("Chars: %s\n", program_split[i])
+		}
+		out.WriteString("}\n")
+		// print("Lines: %s\n", program_split)
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+}
+
 func simulate(file string) {
 	program_file, err := os.ReadFile(os.Args[1])
 	check_err(err)
@@ -205,6 +282,7 @@ func simulate(file string) {
 	if OP_COUNT != 8 {
 		print("%s: Operations not handled properly.\n", red("ERROR"))
 	} else {
+		// compile_program(TrimNewLines(string(program)))
 		evaluate(TrimNewLines(string(program)))
 	}
 }
@@ -225,7 +303,8 @@ func main() {
 		if fileExt != ".glg" {
 			err("Supplying non-Glang file. Make sure it's the right file.\n")
 		} else {
-			simulate(string(os.Args[1]))
+			compile_program(string(os.Args[1]))
+			// simulate(string(os.Args[1]))
 		}
 	}
 }
