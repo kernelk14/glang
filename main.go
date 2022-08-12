@@ -201,7 +201,7 @@ func sliceFileName(fileName string) string {
 }
 
 // TODO(#5): Refine the compilation
-// TODO: Fix the program iteration
+// TODO(#6): Fix the program iteration
 
 func compile_program(file string) {
 	program_file, err := os.Open(os.Args[1])
