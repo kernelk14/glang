@@ -200,7 +200,9 @@ func sliceFileName(fileName string) string {
 	return fileName[:len(fileName)-len(filepath.Ext(fileName))]
 }
 
-// TODO: Refine the compilation
+// TODO(#5): Refine the compilation
+// TODO: Fix the program iteration
+
 func compile_program(file string) {
 	program_file, err := os.Open(os.Args[1])
 	if err != nil {
