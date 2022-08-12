@@ -17,7 +17,7 @@ import (
 const VERSION = "0.0.3-beta"
 
 // Stage: it's either `devel`, or `release`
-const STAGE = "devel"
+const STAGE = "release"
 
 // Special Functions
 var red = color.New(color.FgRed).SprintFunc()
@@ -205,7 +205,9 @@ func compilation(file string) {
 	// program := string(program_file)
 	program := strings.TrimSuffix(string(program_file), "\n")
 	program_split := strings.Split(strings.ReplaceAll(string(program), "\n", " "), " ")
-	print("%s\n", program_split)
+	if STAGE == "devel" {
+		print("%s\n", program_split)
+	}
 	file_with_ext := os.Args[1]
 	ff := sliceFileName(file_with_ext)
 	out, err := os.Create(ff + ".go")
@@ -234,7 +236,9 @@ func compilation(file string) {
 			stack.push(b - a)
 			i += 1
 		case "write":
-			print("`write`, reaching here.\n")
+			if STAGE == "devel" {
+				print("`write`, reaching here.\n")
+			}
 			a, _ := stack.pop()
 			_, err := out.WriteString("    fmt.Printf(\"" + "%")
 			_, err2 := out.WriteString("d\\n\", ")
@@ -248,7 +252,9 @@ func compilation(file string) {
 				panic(err3)
 			}
 		case "write\\n":
-			print("`write\\n`, reaching here.\n")
+			if STAGE == "devel" {
+				print("`write\\n`, reaching here.\n")
+			}
 			a, _ := stack.pop()
 			_, err := out.WriteString("    fmt.Printf(\"" + "%")
 			_, err2 := out.WriteString("d\\n\", ")
@@ -272,8 +278,6 @@ func compilation(file string) {
 	out.WriteString("}\n")
 	defer out.Close()
 }
-
-// TODO: Refine the compilation
 
 func simulate(file string) {
 	program_file, err := os.ReadFile(os.Args[1])
