@@ -4,7 +4,9 @@ package main
 
 import (
 	"fmt"
+	// "log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -199,13 +201,6 @@ func sliceFileName(fileName string) string {
 	return fileName[:len(fileName)-len(filepath.Ext(fileName))]
 }
 
-<<<<<<< HEAD
-// TODO(#5): Refine the compilation
-// TODO(#6): Fix the program iteration
-
-func compile_program(file string) {
-	program_file, err := os.Open(os.Args[1])
-=======
 func compilation(file string) {
 	program_file, err := os.ReadFile(os.Args[1])
 	check_err(err)
@@ -217,12 +212,13 @@ func compilation(file string) {
 	}
 	file_with_ext := os.Args[1]
 	ff := sliceFileName(file_with_ext)
-	out, err := os.Create(ff + ".go")
->>>>>>> origin/6-program-iteration
+	filename := ff + ".go"
+	out, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
 	var stack Stack
+	out.WriteString("// This is transpiled from a Glang code.\n")
 	out.WriteString("package main\n")
 	out.WriteString("import \"fmt\"\n")
 	out.WriteString("func main() {\n")
@@ -285,6 +281,14 @@ func compilation(file string) {
 	}
 	out.WriteString("}\n")
 	defer out.Close()
+	print("Glang: Transpiled code to %s\n", filename)
+	cmd, err_cmd := exec.Command("go", "run", filename).Output()
+	output := string(cmd[:])
+	// err_cmd := cmd.Run()
+	if err_cmd != nil {
+		print("%s\n", err)
+	}
+	print(output)
 }
 
 func simulate(file string) {
