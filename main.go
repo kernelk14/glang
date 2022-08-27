@@ -19,7 +19,7 @@ import (
 const VERSION = "0.0.3-beta"
 
 // Stage: it's either `devel`, or `release`
-const STAGE = "release"
+const STAGE = "devel"
 
 // Special Functions
 var red = color.New(color.FgRed).SprintFunc()
@@ -36,6 +36,12 @@ func err(err_str string) {
 
 func warn(warning string) {
 	print("%s %s", yellowC, warning)
+}
+
+func check_devel(code string, operation string) {
+	if STAGE == "devel" {
+		print("%s:  A %s Instruction\n", code, operation)
+	}
 }
 
 // Here are the list of operations, after you add an operation here, go to function simulate()
@@ -78,6 +84,9 @@ func (s *Stack) pop() (int, bool) {
 var trace = false
 
 // }}}
+
+
+// TODO: Make far more instructions.
 
 // The easiest way to print
 var print = fmt.Printf
@@ -127,6 +136,32 @@ func evaluate(program string) {
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a / b)
+		case "shl":
+			if STAGE == "devel" {
+				print("%s  : A Shift Left Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			stack.push(a << b)
+		case "shr":
+			if STAGE == "devel" {
+				print("%s  : A Shift Right Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			stack.push(a >> b)
+		case "dup":
+			if STAGE == "devel" {
+				print("%s  : A Duplication Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			stack.push(a)
+			stack.push(a)
+		case "drop":
+			if STAGE == "devel" {
+				print("%s  : A Drop Instruction\n", code)
+			}
+			stack.pop()
 		case "write":
 			if STAGE == "devel" {
 				print("%s  : A Write instruction\n", code)
@@ -255,6 +290,40 @@ func compilation(file string) {
 				panic(err2)
 				panic(err3)
 			}
+		case "shl":
+			if STAGE == "devel" {
+				print("%s  : A Shift Left Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			stack.push(a << b)
+			i += 1
+		case "shr":
+			if STAGE == "devel" {
+				print("%s  : A Shift Right Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			b, _ := stack.pop()
+			_, err := out.WriteString("// This is supposed to be a Shift Right Instruction.\n")
+			if err != nil {
+				panic(err)
+			}
+			stack.push(a >> b)
+			i += 1
+		case "dup":
+			if STAGE == "devel" {
+				print("%s  : A Duplication Instruction\n", code)
+			}
+			a, _ := stack.pop()
+			stack.push(a)
+			stack.push(a)
+			i += 1
+		case "drop":
+			if STAGE == "devel" {
+				print("%s  : A Drop Instruction\n", code)
+			}
+			stack.pop()
+			i += 1
 		case "write\\n":
 			if STAGE == "devel" {
 				print("`write\\n`, reaching here.\n")
