@@ -16,7 +16,8 @@ import (
 )
 
 // Version number
-const VERSION = "0.0.3-beta"
+// Today is April 04, 2023 as of last editing
+const VERSION = "0.4.6-beta"
 
 // Stage: it's either `devel`, or `release`
 const STAGE = "devel"
