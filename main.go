@@ -16,8 +16,8 @@ import (
 )
 
 // Version number
-// Today is April 04, 2023 as of last editing
-const VERSION = "0.4.6-beta"
+// Today is July 25, 2023 as of last editing
+const VERSION = "0.7.25-beta"
 
 // Stage: it's either `devel`, or `release`
 const STAGE = "devel"
@@ -29,6 +29,7 @@ var (
 	yellow  = color.New(color.FgYellow).SprintFunc()
 	yellowC = yellow("WARNING:")
 	redC    = red("ERROR:")
+	green	= color.New(color.FgHiGreen).SprintFunc()
 )
 
 func err(err_str string) {
@@ -41,26 +42,28 @@ func warn(warning string) {
 
 func check_devel(code string, operation string) {
 	if STAGE == "devel" {
-		print("%s:  A %s Instruction\n", code, operation)
+		print("%s:  A %s Instruction\n", green(code), green(operation))
 	}
 }
 
 // Here are the list of operations, after you add an operation here, go to function simulate()
 // and you will find an `if` statement, you will increment the number in the `if` statement.
 const (
-	OP_PUSH  = iota
-	OP_WRITE = iota
-	OP_PLUS  = iota
-	OP_MINUS = iota
-	OP_MULTI = iota
-	OP_DIV   = iota
-	OP_POS   = iota
-	OP_GOTO  = iota
-	OP_COUNT = iota
+	OP_PUSH		= iota
+	OP_WRITE	= iota
+	OP_PLUS		= iota
+	OP_MINUS	= iota
+	OP_MULTI	= iota
+	OP_DIV		= iota
+	OP_POS		= iota
+	OP_GOTO		= iota
+	OP_COUNT	= iota
+	OP_VSTACK = iota
 )
 
 // Stack {{{
 type Stack []int
+
 
 func (s *Stack) is_empty() bool {
 	return len(*s) == 0
@@ -95,6 +98,7 @@ var print = fmt.Printf
 func evaluate(program string) {
 	program_split := strings.Split(strings.ReplaceAll(string(program), "\n", " "), " ")
 	var stack Stack
+	var vstack Stack
 	var goto_stack Stack
 	for i := 0; i < len(program_split); {
 		code := program_split[i]
@@ -107,33 +111,29 @@ func evaluate(program string) {
 		}
 		switch code {
 		case "+":
-			if STAGE == "devel" {
-				print("%s  : A Plus instruction\n", code)
-			}
+			check_devel(code, "Plus")
+			
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a + b)
 
 		case "-":
-			if STAGE == "devel" {
-				print("%s  : A Minus instruction\n", code)
-			}
+			check_devel(code, "Minus")
+
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(b - a)
 
 		case "*":
-			if STAGE == "devel" {
-				print("%s  : A Multiply Instruction\n", code)
-			}
+			check_devel(code, "Multiply")
+
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a * b)
 
 		case "/":
-			if STAGE == "devel" {
-				print("%s  : A Divide Instruction\n", code)
-			}
+			check_devel(code, "Divide")
+
 			a, _ := stack.pop()
 			b, _ := stack.pop()
 			stack.push(a / b)
@@ -164,9 +164,7 @@ func evaluate(program string) {
 			}
 			stack.pop()
 		case "write":
-			if STAGE == "devel" {
-				print("%s  : A Write instruction\n", code)
-			}
+			check_devel(code, "Write")
 			a, _ := stack.pop()
 			if STAGE == "devel" {
 				print("Glang Debug [Result]: %d\n", a)
@@ -189,6 +187,11 @@ func evaluate(program string) {
 		case "goto":
 			g, _ := goto_stack.pop()
 			i = g
+		case "vst":
+			var vstack Stack
+			vstack.push(0)
+		case "vpush":
+			vstack.push(int(program[i-1]))
 		case "end":
 			// break
 			os.Exit(1)
@@ -197,7 +200,7 @@ func evaluate(program string) {
 			print("Stack Contents: %d\n", stack)
 		default:
 			if STAGE == "devel" {
-				print("%s  : Integers to be pushed\n", code)
+				print("%s  : Integers to be pushed\n", green(code))
 			}
 			c_psh, _ := strconv.Atoi(code)
 			stack.push(c_psh)
@@ -205,7 +208,6 @@ func evaluate(program string) {
 				warn("Stack tracing started\n")
 				print("Stack Contents: %d\n", stack)
 			}
-
 		}
 		i += 1
 		if STAGE == "devel" {
@@ -255,6 +257,9 @@ func compilation(file string) {
 	}
 	var stack Stack
 	out.WriteString("// This is transpiled from a Glang code.\n")
+	out.WriteString("// From ")
+	out.WriteString(string(file_with_ext))
+	out.WriteString("\n")
 	out.WriteString("package main\n")
 	out.WriteString("import \"fmt\"\n")
 	out.WriteString("func main() {\n")
